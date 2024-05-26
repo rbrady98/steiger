@@ -2,34 +2,35 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
-	_ "github.com/joho/godotenv/autoload"
+	"steiger/internal/config"
+	"steiger/internal/services/joke"
 
-	"steiger/internal/database"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type Server struct {
-	port int
+	port string
 
-	db database.Service
+	log *slog.Logger
+
+	jokeSvc *joke.JokeService
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
-
-		db: database.New(),
+func NewServer(cfg config.Config, logger *slog.Logger, jokeSvc *joke.JokeService) *http.Server {
+	s := &Server{
+		port:    cfg.Port,
+		log:     logger,
+		jokeSvc: jokeSvc,
 	}
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Addr:         fmt.Sprintf(":%s", s.port),
+		Handler:      s.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

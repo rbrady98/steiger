@@ -1,0 +1,21 @@
+linters-settings:
+  gofumpt:
+    # Module path which contains the source code being formatted.
+    # Default: ""
+    module-path: steiger
+
+
+linters:
+  disable-all: true
+  enable:
+  - unused
+  - gosimple
+  - bodyclose
+  - gocritic
+  - gofumpt
+  - govet
+  - ineffassign
+  - importas
+  - misspell
+  - staticcheck
+  - prealloc

@@ -27,3 +27,6 @@ tmp/
 
 # Project build
 main
+
+# Test database
+test.db

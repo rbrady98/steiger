@@ -1,6 +1,6 @@
-# Project steiger
+# Project Steiger
 
-One Paragraph of project description goes here
+Steiger (dutch for scaffold) is a personal scaffolding for web server projects.
 
 ## Getting Started
 

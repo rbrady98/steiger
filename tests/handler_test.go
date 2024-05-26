@@ -4,8 +4,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"steiger/internal/server"
 	"testing"
+
+	"steiger/internal/server"
 )
 
 func TestHandler(t *testing.T) {
