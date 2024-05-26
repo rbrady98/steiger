@@ -1,4 +1,4 @@
-module steiger
+module github.com/rbrady98/steiger
 
 go 1.21.0
 

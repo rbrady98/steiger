@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	apperror "steiger/internal/app_error"
-	"steiger/internal/codec"
-	"steiger/internal/services/joke"
+	apperror "github.com/rbrady98/steiger/internal/app_error"
+	"github.com/rbrady98/steiger/internal/codec"
+	"github.com/rbrady98/steiger/internal/services/joke"
 )
 
 func GetJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.ResponseWriter, r *http.Request) error {

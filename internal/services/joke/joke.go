@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"time"
 
-	"steiger/internal/storage/sqlite"
+	"github.com/rbrady98/steiger/internal/storage/sqlite"
 
 	"github.com/jmoiron/sqlx"
 )

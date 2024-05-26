@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"steiger/internal/codec"
+	"github.com/rbrady98/steiger/internal/codec"
 
-	apperror "steiger/internal/app_error"
+	apperror "github.com/rbrady98/steiger/internal/app_error"
 )
 
 type handlerFn func(http.ResponseWriter, *http.Request) error

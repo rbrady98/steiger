@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"steiger/internal/handlers"
+	"github.com/rbrady98/steiger/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"steiger/internal/config"
-	"steiger/internal/services/joke"
+	"github.com/rbrady98/steiger/internal/config"
+	"github.com/rbrady98/steiger/internal/services/joke"
 
 	_ "github.com/joho/godotenv/autoload"
 )
