@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/rbrady98/steiger/internal/codec"
@@ -16,7 +17,7 @@ func (fn handlerFn) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var e *apperror.AppError
 		if errors.As(err, &e) {
 			if encodeErr := codec.Encode(w, e.Code, e); encodeErr != nil {
-				codec.Encode(w, 500, map[string]string{"error": encodeErr.Error()})
+				log.Println("error encoding response", encodeErr)
 			}
 			return
 		}

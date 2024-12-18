@@ -4,7 +4,6 @@ linters-settings:
 
 
 linters:
-  disable-all: true
   enable:
   - unused
   - gosimple
