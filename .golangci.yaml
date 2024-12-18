@@ -1,7 +1,5 @@
 linters-settings:
   gofumpt:
-    # Module path which contains the source code being formatted.
-    # Default: ""
     module-path: github.com/rbrady98/steiger
 
 

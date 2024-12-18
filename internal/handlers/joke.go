@@ -24,9 +24,9 @@ func GetJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.Res
 		j, err := jokeSvc.GetJoke(r.Context(), ID)
 		if err != nil {
 			if errors.Is(err, joke.ErrNotFound) {
-				return apperror.New(err.Error(), http.StatusNotFound)
+				return apperror.NewFromError(err, http.StatusNotFound)
 			}
-			return apperror.New(err.Error(), http.StatusInternalServerError)
+			return apperror.NewFromError(err, http.StatusInternalServerError)
 		}
 
 		_ = codec.Encode(w, http.StatusOK, j)
@@ -43,12 +43,12 @@ func CreateJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.
 	return func(w http.ResponseWriter, r *http.Request) error {
 		req, err := codec.Decode[request](r)
 		if err != nil {
-			return apperror.New(err.Error(), http.StatusBadRequest)
+			return apperror.NewFromError(err, http.StatusBadRequest)
 		}
 
 		err = jokeSvc.CreateJoke(r.Context(), req.Joke, req.Nsfw)
 		if err != nil {
-			return apperror.New(err.Error(), http.StatusInternalServerError)
+			return apperror.NewFromError(err, http.StatusInternalServerError)
 		}
 
 		return nil
@@ -59,7 +59,7 @@ func ListJokesHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.R
 	return func(w http.ResponseWriter, r *http.Request) error {
 		jokes, err := jokeSvc.ListJokes(r.Context())
 		if err != nil {
-			return apperror.New(err.Error(), http.StatusInternalServerError)
+			return apperror.NewFromError(err, http.StatusInternalServerError)
 		}
 
 		return codec.Encode(w, http.StatusOK, jokes)
