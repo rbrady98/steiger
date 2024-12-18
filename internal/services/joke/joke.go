@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/rbrady98/steiger/internal/storage/model"
 	"github.com/rbrady98/steiger/internal/storage/sqlite"
 
 	"github.com/jmoiron/sqlx"
@@ -17,7 +18,7 @@ var ErrNotFound = errors.New("not found")
 
 type JokeService struct {
 	log  *slog.Logger
-	repo sqlite.JokeRepo
+	repo model.JokeRepo
 }
 
 type Joke struct {
@@ -56,7 +57,7 @@ func (j *JokeService) CreateJoke(ctx context.Context, joke string, nsfw bool) er
 		return errors.New("joke string cannot be empty")
 	}
 
-	return j.repo.Create(ctx, sqlite.CreateJokeParams{Joke: joke, Nsfw: nsfw})
+	return j.repo.Create(ctx, joke, nsfw)
 }
 
 func (j *JokeService) ListJokes(ctx context.Context) ([]Joke, error) {
@@ -74,7 +75,7 @@ func (j *JokeService) ListJokes(ctx context.Context) ([]Joke, error) {
 }
 
 // fromStorage adapts a db joke struct to a service layer joke
-func fromStorage(j sqlite.Joke) Joke {
+func fromStorage(j model.Joke) Joke {
 	return Joke{
 		ID:        j.ID,
 		Joke:      j.Joke,
