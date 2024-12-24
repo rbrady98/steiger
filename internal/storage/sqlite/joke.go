@@ -31,16 +31,11 @@ func NewSqliteJokeRepo(db *sqlx.DB) *SqliteJokeRepo {
 }
 
 func (r *SqliteJokeRepo) Get(ctx context.Context, id int) (joke.Joke, error) {
-	row := r.db.QueryRowxContext(ctx, `SELECT * FROM jokes WHERE id = ? LIMIT 1`, id)
-
 	var j JokeModel
-	err := row.StructScan(&j)
-	if err != nil {
+	if err := r.db.GetContext(ctx, &j, `SELECT * FROM jokes WHERE id = ? LIMIT 1`, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return joke.Joke{}, storage.ErrNoRows
 		}
-
-		return joke.Joke{}, err
 	}
 
 	return fromJokeModel(j), nil
