@@ -2,24 +2,15 @@ package joke
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
-	"github.com/rbrady98/steiger/internal/storage/model"
-	"github.com/rbrady98/steiger/internal/storage/sqlite"
-
-	"github.com/jmoiron/sqlx"
+	"github.com/rbrady98/steiger/internal/storage"
 )
 
 var ErrNotFound = errors.New("not found")
-
-type JokeService struct {
-	log  *slog.Logger
-	repo model.JokeRepo
-}
 
 type Joke struct {
 	ID        int       `json:"id"`
@@ -28,10 +19,21 @@ type Joke struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func NewJokeService(log *slog.Logger, db *sqlx.DB) *JokeService {
+type JokeRepo interface {
+	Get(ctx context.Context, id int) (Joke, error)
+	Create(ctx context.Context, content string, nsfw bool) error
+	List(ctx context.Context) ([]Joke, error)
+}
+
+type JokeService struct {
+	log  *slog.Logger
+	repo JokeRepo
+}
+
+func NewJokeService(log *slog.Logger, repo JokeRepo) *JokeService {
 	return &JokeService{
 		log:  log,
-		repo: sqlite.NewSqliteJokeRepo(db),
+		repo: repo,
 	}
 }
 
@@ -43,13 +45,13 @@ func (j *JokeService) GetJoke(ctx context.Context, id int) (Joke, error) {
 
 	joke, err := j.repo.Get(ctx, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, storage.ErrNoRows) {
 			return Joke{}, fmt.Errorf("no joke with id %d found: %w", id, ErrNotFound)
 		}
 		return Joke{}, err
 	}
 
-	return fromStorage(joke), nil
+	return joke, nil
 }
 
 func (j *JokeService) CreateJoke(ctx context.Context, joke string, nsfw bool) error {
@@ -66,20 +68,5 @@ func (j *JokeService) ListJokes(ctx context.Context) ([]Joke, error) {
 		return nil, err
 	}
 
-	newJokes := make([]Joke, 0, len(jokes))
-	for _, joke := range jokes {
-		newJokes = append(newJokes, fromStorage(joke))
-	}
-
-	return newJokes, nil
-}
-
-// fromStorage adapts a db joke struct to a service layer joke
-func fromStorage(j model.Joke) Joke {
-	return Joke{
-		ID:        j.ID,
-		Joke:      j.Joke,
-		Nsfw:      j.Nsfw,
-		CreatedAt: j.CreatedAt,
-	}
+	return jokes, nil
 }

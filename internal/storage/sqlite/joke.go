@@ -2,16 +2,27 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/rbrady98/steiger/internal/storage/model"
+	"github.com/rbrady98/steiger/internal/services/joke"
+	"github.com/rbrady98/steiger/internal/storage"
 )
 
 type SqliteJokeRepo struct {
 	db *sqlx.DB
 }
 
-var _ model.JokeRepo = &SqliteJokeRepo{}
+var _ joke.JokeRepo = &SqliteJokeRepo{}
+
+type JokeModel struct {
+	ID        int
+	Joke      string
+	Nsfw      bool
+	CreatedAt time.Time
+}
 
 func NewSqliteJokeRepo(db *sqlx.DB) *SqliteJokeRepo {
 	return &SqliteJokeRepo{
@@ -19,21 +30,20 @@ func NewSqliteJokeRepo(db *sqlx.DB) *SqliteJokeRepo {
 	}
 }
 
-func (r *SqliteJokeRepo) Get(ctx context.Context, id int) (model.Joke, error) {
+func (r *SqliteJokeRepo) Get(ctx context.Context, id int) (joke.Joke, error) {
 	row := r.db.QueryRowxContext(ctx, `SELECT * FROM jokes WHERE id = ? LIMIT 1`, id)
 
-	var j model.Joke
+	var j JokeModel
 	err := row.StructScan(&j)
 	if err != nil {
-		return model.Joke{}, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return joke.Joke{}, storage.ErrNoRows
+		}
+
+		return joke.Joke{}, err
 	}
 
-	return j, nil
-}
-
-type CreateJokeParams struct {
-	Joke string
-	Nsfw bool
+	return fromJokeModel(j), nil
 }
 
 func (r *SqliteJokeRepo) Create(ctx context.Context, content string, nsfw bool) error {
@@ -46,9 +56,28 @@ func (r *SqliteJokeRepo) Create(ctx context.Context, content string, nsfw bool) 
 	return err
 }
 
-func (r *SqliteJokeRepo) List(ctx context.Context) ([]model.Joke, error) {
-	var j []model.Joke
+func (r *SqliteJokeRepo) List(ctx context.Context) ([]joke.Joke, error) {
+	var j []JokeModel
 	err := r.db.Select(&j, `SELECT * FROM jokes LIMIT 50`)
 
-	return j, err
+	return fromJokeModelSlice(j), err
+}
+
+func fromJokeModel(m JokeModel) joke.Joke {
+	return joke.Joke{
+		ID:        m.ID,
+		Joke:      m.Joke,
+		Nsfw:      m.Nsfw,
+		CreatedAt: m.CreatedAt,
+	}
+}
+
+func fromJokeModelSlice(m []JokeModel) []joke.Joke {
+	s := make([]joke.Joke, 0, len(m))
+
+	for _, v := range m {
+		s = append(s, fromJokeModel(v))
+	}
+
+	return s
 }
