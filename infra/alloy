@@ -1,0 +1,19 @@
+logging {
+		level = "info"
+		format = "logfmt"
+}
+
+prometheus.remote_write "default" {
+		endpoint {
+				url = "http://mimir:9009/api/v1/push"
+		}
+}
+
+prometheus.scrape "scrape" {
+		targets = [{
+				"__address__" = "host.docker.internal:8080",
+		}]
+
+		scrape_interval = "10s"
+		forward_to = [prometheus.remote_write.default.receiver]
+}

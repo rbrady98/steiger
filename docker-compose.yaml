@@ -1,0 +1,22 @@
+name: metrics-test
+services:
+  alloy:
+    image: grafana/alloy
+    ports:
+      - "12345:12345"
+    volumes:
+      - "./infra/alloy:/etc/alloy/config.alloy"
+    command: [
+      "run",
+      "--server.http.listen-addr=0.0.0.0:12345",
+      "--stability.level=public-preview",
+      "/etc/alloy/config.alloy",
+    ]
+
+  mimir:
+    image: grafana/mimir:2.13.0
+    command: ["-ingester.native-histograms-ingestion-enabled=true", "-config.file=/etc/mimir.yaml"]
+    ports:
+      - "9009:9009"
+    volumes:
+      - "./infra/mimir.yaml:/etc/mimir.yaml"

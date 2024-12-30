@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rbrady98/steiger/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
@@ -12,6 +13,8 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+
+	r.Get("/metrics", promhttp.Handler().ServeHTTP)
 
 	r.Get("/", handler(handlers.ListJokesHandler(s.log, s.jokeSvc)))
 	r.Get("/{id}", handler(handlers.GetJokeHandler(s.log, s.jokeSvc)))
