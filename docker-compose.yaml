@@ -1,9 +1,14 @@
 name: metrics-test
 services:
-  alloy:
-    image: grafana/alloy
+  steiger:
+    build: .
     ports:
-      - "12345:12345"
+      - 8080:8080
+    volumes:
+      - ".:/app"
+
+  alloy:
+    image: grafana/alloy:latest
     volumes:
       - "./infra/alloy:/etc/alloy/config.alloy"
     command: [
@@ -14,9 +19,14 @@ services:
     ]
 
   mimir:
-    image: grafana/mimir:2.13.0
+    image: grafana/mimir:latest
     command: ["-ingester.native-histograms-ingestion-enabled=true", "-config.file=/etc/mimir.yaml"]
-    ports:
-      - "9009:9009"
     volumes:
       - "./infra/mimir.yaml:/etc/mimir.yaml"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: 
+      - 3000:3000
+    volumes: 
+      - ./tmp/grafana:/var/lib/grafana
