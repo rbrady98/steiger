@@ -13,6 +13,7 @@ import (
 
 	"github.com/rbrady98/steiger/internal/config"
 	"github.com/rbrady98/steiger/internal/database"
+	"github.com/rbrady98/steiger/internal/metrics"
 	"github.com/rbrady98/steiger/internal/server"
 	"github.com/rbrady98/steiger/internal/services/joke"
 	"github.com/rbrady98/steiger/internal/storage/sqlite"
@@ -45,10 +46,12 @@ func run(ctx context.Context) error {
 		handler = slog.NewJSONHandler(os.Stdout, opts)
 	}
 
+	metrics := metrics.NewMetrics()
+
 	logger := slog.New(handler)
 	jokeSvc := joke.NewJokeService(logger, sqlite.NewSqliteJokeRepo(db))
 
-	srv := server.NewServer(cfg, logger, jokeSvc)
+	srv := server.NewServer(cfg, logger, metrics, jokeSvc)
 
 	go func() {
 		log.Printf("listening on %s\n", srv.Addr)
