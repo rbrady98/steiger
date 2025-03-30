@@ -1,39 +1,14 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# Ignore all by default
+*
 
-# Test binary, built with "go test -c"
-*.test
+# Allow go files
+!*.go
+!go.mod
+!go.sum
+!**/*.go
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# Allow build files
+!Makefile
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-tmp/
-
-# IDE specific files
-.vscode
-.idea
-
-# .env file
-.env
-.env.*
-
-# Project build
-build/
-
-# Test database
-test.db
-
-# Infra files
-infra/
-
-# Git folder
-.git
+# Devevelopment files
+!.air.toml
