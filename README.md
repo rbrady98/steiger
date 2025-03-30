@@ -9,6 +9,16 @@ inspiration from [Mat Ryer's](https://bsky.app/profile/matryer.bsky.social) writ
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+## Observability stack
+
+This branch includes some observability features based on the Grafana LGTM stack. To run the stack use:
+```bash
+docker compose up
+```
+
+Grafana will then be accessible on port 3000 with default credentials along with a basic dashboard for viewing some of the programs metrics.
+These metrics include both runtime metrics of the application as well as product metrics such as the number of jokes created
+
 ## MakeFile
 
 run all make commands with clean tests
