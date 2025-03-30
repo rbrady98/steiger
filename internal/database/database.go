@@ -2,11 +2,11 @@ package database
 
 import (
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func New(dsn string) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("sqlite3", dsn)
+	db, err := sqlx.Connect("sqlite", dsn)
 	if err != nil {
 		return nil, err
 	}

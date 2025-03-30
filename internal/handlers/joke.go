@@ -58,6 +58,7 @@ func CreateJokeHandler(
 
 		metrics.JokesCreated.Inc()
 
+		w.WriteHeader(http.StatusCreated)
 		return nil
 	}
 }
