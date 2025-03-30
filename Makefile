@@ -6,7 +6,7 @@ all: build
 build:
 	@echo "Building..."
 	
-	go build -o build/main cmd/api/main.go
+	CGO_ENABLED=0 go build -ldflags="-w -s" -o build/app cmd/api/main.go
 
 # Run the application
 run:

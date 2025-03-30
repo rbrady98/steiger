@@ -24,9 +24,16 @@ tmp/
 
 # .env file
 .env
+.env.*
 
 # Project build
 build/
 
 # Test database
 test.db
+
+# Infra files
+infra/
+
+# Git folder
+.git
