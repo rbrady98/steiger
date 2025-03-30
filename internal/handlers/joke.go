@@ -51,6 +51,7 @@ func CreateJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.
 			return apperror.NewFromError(err, http.StatusInternalServerError)
 		}
 
+		w.WriteHeader(http.StatusCreated)
 		return nil
 	}
 }
