@@ -14,7 +14,7 @@ import (
 	"github.com/rbrady98/steiger/internal/config"
 	"github.com/rbrady98/steiger/internal/database"
 	"github.com/rbrady98/steiger/internal/server"
-	"github.com/rbrady98/steiger/internal/services/joke"
+	"github.com/rbrady98/steiger/internal/services"
 	"github.com/rbrady98/steiger/internal/storage/sqlite"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -46,10 +46,11 @@ func run(ctx context.Context) error {
 	}
 
 	logger := slog.New(handler)
-	jokeSvc := joke.NewJokeService(logger, sqlite.NewSqliteJokeRepo(db))
+	jokeSvc := services.NewJokeService(logger, sqlite.NewSqliteJokeRepo(db))
 
 	srv := server.NewServer(cfg, logger, jokeSvc)
 
+	// TODO: base hot reloading on new relic hot reloading article
 	go func() {
 		log.Printf("listening on %s\n", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

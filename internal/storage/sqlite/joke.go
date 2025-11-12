@@ -1,3 +1,4 @@
+// Package sqlite contains implementations of repositories backed by sqlite
 package sqlite
 
 import (
@@ -7,15 +8,14 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/rbrady98/steiger/internal/services/joke"
-	"github.com/rbrady98/steiger/internal/storage"
+	"github.com/rbrady98/steiger/internal/domain/joke"
 )
 
-type SqliteJokeRepo struct {
+type JokeRepo struct {
 	db *sqlx.DB
 }
 
-var _ joke.JokeRepo = &SqliteJokeRepo{}
+var _ joke.Repository = &JokeRepo{}
 
 type JokeModel struct {
 	ID        int
@@ -24,24 +24,24 @@ type JokeModel struct {
 	CreatedAt time.Time
 }
 
-func NewSqliteJokeRepo(db *sqlx.DB) *SqliteJokeRepo {
-	return &SqliteJokeRepo{
+func NewSqliteJokeRepo(db *sqlx.DB) *JokeRepo {
+	return &JokeRepo{
 		db: db,
 	}
 }
 
-func (r *SqliteJokeRepo) Get(ctx context.Context, id int) (joke.Joke, error) {
+func (r *JokeRepo) Get(ctx context.Context, id int) (joke.Joke, error) {
 	var j JokeModel
 	if err := r.db.GetContext(ctx, &j, `SELECT * FROM jokes WHERE id = ? LIMIT 1`, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return joke.Joke{}, storage.ErrNoRows
+			return joke.Joke{}, joke.ErrNotFound
 		}
 	}
 
 	return fromJokeModel(j), nil
 }
 
-func (r *SqliteJokeRepo) Create(ctx context.Context, content string, nsfw bool) error {
+func (r *JokeRepo) Create(ctx context.Context, content string, nsfw bool) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		`INSERT INTO jokes (joke, nsfw, createdat) VALUES ( $1, $2, datetime('now'))`,
@@ -51,9 +51,9 @@ func (r *SqliteJokeRepo) Create(ctx context.Context, content string, nsfw bool) 
 	return err
 }
 
-func (r *SqliteJokeRepo) List(ctx context.Context) ([]joke.Joke, error) {
+func (r *JokeRepo) List(ctx context.Context) ([]joke.Joke, error) {
 	var j []JokeModel
-	err := r.db.Select(&j, `SELECT * FROM jokes LIMIT 50`)
+	err := r.db.SelectContext(ctx, &j, `SELECT * FROM jokes LIMIT 50`)
 
 	return fromJokeModelSlice(j), err
 }

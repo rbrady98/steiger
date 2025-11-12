@@ -10,10 +10,11 @@ import (
 
 	apperror "github.com/rbrady98/steiger/internal/app_error"
 	"github.com/rbrady98/steiger/internal/codec"
-	"github.com/rbrady98/steiger/internal/services/joke"
+	"github.com/rbrady98/steiger/internal/domain/joke"
+	"github.com/rbrady98/steiger/internal/services"
 )
 
-func GetJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.ResponseWriter, r *http.Request) error {
+func GetJokeHandler(_ *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		IDstr := chi.URLParam(r, "id")
 		ID, err := strconv.Atoi(IDstr)
@@ -34,7 +35,7 @@ func GetJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.Res
 	}
 }
 
-func CreateJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.ResponseWriter, r *http.Request) error {
+func CreateJokeHandler(_ *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
 	type request struct {
 		Joke string `json:"joke"`
 		Nsfw bool   `json:"nsfw"`
@@ -56,7 +57,7 @@ func CreateJokeHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.
 	}
 }
 
-func ListJokesHandler(log *slog.Logger, jokeSvc *joke.JokeService) func(w http.ResponseWriter, r *http.Request) error {
+func ListJokesHandler(_ *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		jokes, err := jokeSvc.ListJokes(r.Context())
 		if err != nil {
