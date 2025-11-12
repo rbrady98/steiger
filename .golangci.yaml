@@ -1,18 +1,21 @@
-linters-settings:
-  gofumpt:
-    module-path: github.com/rbrady98/steiger
-
+version: "2"
 
 linters:
+  default: standard
   enable:
-  - unused
-  - gosimple
-  - bodyclose
-  - gocritic
-  - gofumpt
-  - govet
-  - ineffassign
-  - importas
-  - misspell
-  - staticcheck
-  - prealloc
+    - exhaustive
+    - revive
+    - misspell
+    - revive
+    - unconvert
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
