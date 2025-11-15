@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
+	"syscall"
 	"time"
 
 	"github.com/rbrady98/steiger/internal/config"
@@ -20,21 +20,26 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+const (
+	shutdownPeriod     = 15 * time.Second
+	shutdownHardPeriod = 3 * time.Second
+)
+
 func main() {
-	ctx := context.Background()
-	if err := run(ctx); err != nil {
+	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context) error {
+func run() error {
 	cfg := config.NewConfig()
 
 	db, err := database.New(cfg.DbURL)
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	opts := &slog.HandlerOptions{
 		Level: slog.LevelDebug,
@@ -48,34 +53,37 @@ func run(ctx context.Context) error {
 	logger := slog.New(handler)
 	jokeSvc := services.NewJokeService(logger, sqlite.NewSqliteJokeRepo(db))
 
-	srv := server.NewServer(cfg, logger, jokeSvc)
+	// Setup signal context
+	rootCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	// TODO: base hot reloading on new relic hot reloading article
+	// Ensure in-flight requests aren't cancelled immediately
+	ongoingCtx, stopOngoingGracefully := context.WithCancel(context.Background())
+
+	srv := server.NewServer(ongoingCtx, cfg, logger, jokeSvc)
+
 	go func() {
-		log.Printf("listening on %s\n", srv.Addr)
+		log.Println("Server starting on:", cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
+			panic(err)
 		}
 	}()
 
-	// set up context to listen to ctrl+c
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	log.Println("waiting for cancellation")
+	<-rootCtx.Done()
+	stop()
+	log.Println("Received shutdown signal, shutting down.")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownPeriod)
 	defer cancel()
+	err = srv.Shutdown(shutdownCtx)
+	stopOngoingGracefully()
+	if err != nil {
+		log.Println("Failed to wait for ongoing requests to finish, waiting for forced cancellation.")
+		time.Sleep(shutdownHardPeriod)
+	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		<-ctx.Done()
-		// make a new context for the Shutdown (thanks Alessandro Rosetti)
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			fmt.Fprintf(os.Stderr, "error shutting down http server: %s\n", err)
-		}
-	}()
-	wg.Wait()
+	log.Println("Server shut down gracefully")
 
 	return nil
 }

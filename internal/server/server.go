@@ -1,8 +1,12 @@
+// Package server package contains all logic needed to create the http server
+// this includes http server creation and http route registration
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -20,7 +24,7 @@ type Server struct {
 	jokeSvc *services.JokeService
 }
 
-func NewServer(cfg config.Config, logger *slog.Logger, jokeSvc *services.JokeService) *http.Server {
+func NewServer(ctx context.Context, cfg config.Config, logger *slog.Logger, jokeSvc *services.JokeService) *http.Server {
 	s := &Server{
 		port:    cfg.Port,
 		log:     logger,
@@ -34,6 +38,10 @@ func NewServer(cfg config.Config, logger *slog.Logger, jokeSvc *services.JokeSer
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
+		// Ensure that in-flight requests are not cancelled during graceful shutdown
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
 	}
 
 	return server
