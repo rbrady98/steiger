@@ -5,74 +5,58 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/rbrady98/steiger/internal/domain/joke"
+	"github.com/rbrady98/steiger/internal/sqlitedb"
 )
 
 type JokeRepo struct {
-	db *sqlx.DB
+	q *sqlitedb.Queries
 }
 
 var _ joke.Repository = &JokeRepo{}
 
-type JokeModel struct {
-	ID        int
-	Joke      string
-	Nsfw      bool
-	CreatedAt time.Time
-}
-
-func NewSqliteJokeRepo(db *sqlx.DB) *JokeRepo {
-	return &JokeRepo{
-		db: db,
-	}
+func NewSqliteJokeRepo(db *sql.DB) *JokeRepo {
+	return &JokeRepo{q: sqlitedb.New(db)}
 }
 
 func (r *JokeRepo) Get(ctx context.Context, id int) (joke.Joke, error) {
-	var j JokeModel
-	if err := r.db.GetContext(ctx, &j, `SELECT * FROM jokes WHERE id = ? LIMIT 1`, id); err != nil {
+	j, err := r.q.GetJoke(ctx, int64(id))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return joke.Joke{}, joke.ErrNotFound
 		}
+		return joke.Joke{}, err
 	}
 
-	return fromJokeModel(j), nil
+	return fromDBJoke(j), nil
 }
 
 func (r *JokeRepo) Create(ctx context.Context, content string, nsfw bool) error {
-	_, err := r.db.ExecContext(
-		ctx,
-		`INSERT INTO jokes (joke, nsfw, createdat) VALUES ( $1, $2, datetime('now'))`,
-		content,
-		nsfw,
-	)
-	return err
+	return r.q.CreateJoke(ctx, sqlitedb.CreateJokeParams{
+		Joke: content,
+		Nsfw: nsfw,
+	})
 }
 
 func (r *JokeRepo) List(ctx context.Context) ([]joke.Joke, error) {
-	var j []JokeModel
-	err := r.db.SelectContext(ctx, &j, `SELECT * FROM jokes LIMIT 50`)
+	rows, err := r.q.ListJokes(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return fromJokeModelSlice(j), err
+	out := make([]joke.Joke, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, fromDBJoke(row))
+	}
+	return out, nil
 }
 
-func fromJokeModel(m JokeModel) joke.Joke {
+func fromDBJoke(j sqlitedb.Joke) joke.Joke {
 	return joke.Joke{
-		ID:        m.ID,
-		Joke:      m.Joke,
-		Nsfw:      m.Nsfw,
-		CreatedAt: m.CreatedAt,
+		ID:        int(j.ID),
+		Joke:      j.Joke,
+		Nsfw:      j.Nsfw,
+		CreatedAt: j.CreatedAt,
 	}
-}
-
-func fromJokeModelSlice(m []JokeModel) []joke.Joke {
-	s := make([]joke.Joke, 0, len(m))
-
-	for _, v := range m {
-		s = append(s, fromJokeModel(v))
-	}
-
-	return s
 }
