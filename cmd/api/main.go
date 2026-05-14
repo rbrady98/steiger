@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/lmittmann/tint"
 	"github.com/rbrady98/steiger/internal/config"
 	"github.com/rbrady98/steiger/internal/database"
 	"github.com/rbrady98/steiger/internal/server"
@@ -45,7 +45,7 @@ func run() error {
 		Level: slog.LevelDebug,
 	}
 
-	var handler slog.Handler = slog.NewTextHandler(os.Stdout, opts)
+	handler := tint.NewHandler(os.Stdout, nil)
 	if cfg.Env == "production" {
 		handler = slog.NewJSONHandler(os.Stdout, opts)
 	}
@@ -63,27 +63,27 @@ func run() error {
 	srv := server.NewServer(ongoingCtx, cfg, logger, jokeSvc)
 
 	go func() {
-		log.Println("Server starting on:", cfg.Port)
+		logger.Info(fmt.Sprintf("Server starting on: %s", cfg.Port))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
 	}()
 
-	log.Println("waiting for cancellation")
+	logger.Info("waiting for cancellation")
 	<-rootCtx.Done()
 	stop()
-	log.Println("Received shutdown signal, shutting down.")
+	logger.Info("Received shutdown signal, shutting down.")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownPeriod)
 	defer cancel()
 	err = srv.Shutdown(shutdownCtx)
 	stopOngoingGracefully()
 	if err != nil {
-		log.Println("Failed to wait for ongoing requests to finish, waiting for forced cancellation.")
+		logger.Info("Failed to wait for ongoing requests to finish, waiting for forced cancellation.")
 		time.Sleep(shutdownHardPeriod)
 	}
 
-	log.Println("Server shut down gracefully")
+	logger.Info("Server shut down gracefully")
 
 	return nil
 }
