@@ -17,10 +17,10 @@ test:
 	@echo "Testing..."
 	@go test ./tests -v
 
-# Clean the binary
+# Clean the binary and the test.db
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -f main test.db
 
 # Live Reload
 dev:
@@ -29,4 +29,7 @@ dev:
 lint:
 	@golangci-lint run
 
-.PHONY: all build run test clean dev
+sqlcgen:
+	@sqlc generate
+
+.PHONY: all build run test clean dev sqlcgen

@@ -2,47 +2,33 @@
 
 Steiger (dutch for scaffold) is a personal scaffolding for web server projects.
 
-Steiger was initially generated with [Melkeydev/go-blueprint](https://github.com/Melkeydev/go-blueprint) and further modified with my own preferences as well as some
-inspiration from [Mat Ryer's](https://bsky.app/profile/matryer.bsky.social) writings on [writing HTTP services in Go](https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years)
+Steiger draws inspiration from [Mat Ryer's](https://bsky.app/profile/matryer.bsky.social) writings on [writing HTTP services in Go](https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years)
+and the [DDD-lite in Go](https://threedots.tech/post/ddd-lite-in-go-introduction/) approach from Three Dots Labs.
+
+## Motivation
+
+### Sensible enterprise defaults for Go HTTP APIs
+
+### A reaction to overengineering and antipatterns
+
+### Simplicity and minimal abstraction
+
+### Separation of concerns through DDD-lite
+
+### First-class developer experience (sqlc today, oapi-codegen later)
+
+### A package structure that makes sense
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Common tasks are exposed through the `Makefile`:
 
-## MakeFile
-
-run all make commands with clean tests
-
-```bash
-make all build
-```
-
-build the application
-
-```bash
-make build
-```
-
-run the application
-
-```bash
-make run
-```
-
-live reload the application
-
-```bash
-make watch
-```
-
-run the test suite
-
-```bash
-make test
-```
-
-clean up binary from the last build
-
-```bash
-make clean
-```
+| Command | Description |
+| --- | --- |
+| `make build` | Build the binary to `build/main` |
+| `make run` | Run the API |
+| `make dev` | Live-reload via `air` |
+| `make test` | Run the test suite |
+| `make lint` | Run `golangci-lint` |
+| `make sqlcgen` | Regenerate sqlc query bindings |
+| `make clean` | Remove build artifacts |
