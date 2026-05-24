@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,12 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lmittmann/tint"
 	"github.com/rbrady98/steiger/internal/config"
 	"github.com/rbrady98/steiger/internal/database"
 	"github.com/rbrady98/steiger/internal/server"
 	"github.com/rbrady98/steiger/internal/services"
 	"github.com/rbrady98/steiger/internal/storage/sqlite"
+	"github.com/rbrady98/steiger/internal/telemetry"
+	"go.opentelemetry.io/contrib/processors/minsev"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -41,16 +43,8 @@ func run() error {
 	}
 	defer db.Close()
 
-	opts := &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}
+	logger := telemetry.NewLogger(cfg.Env, minsev.SeverityDebug)
 
-	handler := tint.NewHandler(os.Stdout, nil)
-	if cfg.Env == "production" {
-		handler = slog.NewJSONHandler(os.Stdout, opts)
-	}
-
-	logger := slog.New(handler)
 	jokeSvc := services.NewJokeService(logger, sqlite.NewSqliteJokeRepo(db))
 
 	// Setup signal context
@@ -59,11 +53,25 @@ func run() error {
 
 	// Ensure in-flight requests aren't cancelled immediately
 	ongoingCtx, stopOngoingGracefully := context.WithCancel(context.Background())
+	defer stopOngoingGracefully()
+
+	telemetryShutdown, err := telemetry.Setup(ongoingCtx, cfg.Env, minsev.SeverityDebug)
+	if err != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownPeriod)
+		defer cancel()
+		return errors.Join(err, telemetryShutdown(shutdownCtx))
+	}
+
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownPeriod)
+		defer cancel()
+		err = errors.Join(err, telemetryShutdown(shutdownCtx))
+	}()
 
 	srv := server.NewServer(ongoingCtx, cfg, logger, jokeSvc)
 
 	go func() {
-		logger.Info(fmt.Sprintf("Server starting on: %s", cfg.Port))
+		logger.InfoContext(ongoingCtx, "starting server", slog.String("port", cfg.Port))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}

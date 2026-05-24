@@ -32,3 +32,9 @@ Common tasks are exposed through the `Makefile`:
 | `make lint` | Run `golangci-lint` |
 | `make sqlcgen` | Regenerate sqlc query bindings |
 | `make clean` | Remove build artifacts |
+
+## OpenTelemetry
+If you want to test the otel setup you can locally run the "LGTM" stack. Navigate to localhost:3000 to view your telemetry
+```bash
+docker run --rm --network="host" grafana/otel-lgtm:latest
+```

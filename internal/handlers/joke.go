@@ -14,8 +14,9 @@ import (
 	"github.com/rbrady98/steiger/internal/services"
 )
 
-func GetJokeHandler(_ *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
+func GetJokeHandler(logger *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		logger.InfoContext(r.Context(), "getting jokes")
 		IDstr := chi.URLParam(r, "id")
 		ID, err := strconv.Atoi(IDstr)
 		if err != nil {
@@ -57,8 +58,10 @@ func CreateJokeHandler(_ *slog.Logger, jokeSvc *services.JokeService) func(w htt
 	}
 }
 
-func ListJokesHandler(_ *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
+func ListJokesHandler(logger *slog.Logger, jokeSvc *services.JokeService) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		logger.InfoContext(r.Context(), "getting jokes")
+
 		jokes, err := jokeSvc.ListJokes(r.Context())
 		if err != nil {
 			return apperror.NewFromError(err, http.StatusInternalServerError)
