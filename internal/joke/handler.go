@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	apperror "github.com/rbrady98/steiger/internal/app_error"
+	"github.com/rbrady98/steiger/internal/apperror"
 	"github.com/rbrady98/steiger/internal/codec"
 )
 
@@ -31,6 +31,7 @@ func HandleGet(logger *slog.Logger, jokeSvc *Service) func(w http.ResponseWriter
 		}
 
 		_ = codec.Encode(w, http.StatusOK, j)
+
 		return nil
 	}
 }
@@ -53,6 +54,7 @@ func HandleCreate(_ *slog.Logger, jokeSvc *Service) func(w http.ResponseWriter, 
 		}
 
 		w.WriteHeader(http.StatusCreated)
+
 		return nil
 	}
 }
