@@ -7,18 +7,10 @@ and the [DDD-lite in Go](https://threedots.tech/post/ddd-lite-in-go-introduction
 
 ## Motivation
 
-### Sensible enterprise defaults for Go HTTP APIs
-
-### A reaction to overengineering and antipatterns
-
-### Simplicity and minimal abstraction
-
-### Separation of concerns through DDD-lite
-
-### First-class developer experience (sqlc today, oapi-codegen later)
-
-### A package structure that makes sense
-
+- Sensible, out-of-the-box defaults for Go HTTP APIs.
+- A deliberate reaction against overengineering and the overuse of abstractions.
+- Clear separation of concerns utilizing a "DDD-lite" approach, resulting in an intuitive, easily navigable package structure.
+- Leveraging code-generation tools like sqlc (and eventually oapi-codegen) to keep boilerplate to an absolute minimum.
 ## Getting Started
 
 Common tasks are exposed through the `Makefile`:
