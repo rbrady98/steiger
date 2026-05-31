@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rbrady98/steiger/internal/handlers"
+	"github.com/rbrady98/steiger/internal/joke"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.opentelemetry.io/otel/trace"
@@ -41,9 +41,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 		})
 	})
 
-	router.Get("/", handler(handlers.ListJokesHandler(s.log, s.jokeSvc)))
-	router.Get("/{id}", handler(handlers.GetJokeHandler(s.log, s.jokeSvc)))
-	router.Post("/", handler(handlers.CreateJokeHandler(s.log, s.jokeSvc)))
+	router.Get("/", handler(joke.HandleList(s.log, s.jokeSvc)))
+	router.Get("/{id}", handler(joke.HandleGet(s.log, s.jokeSvc)))
+	router.Post("/", handler(joke.HandleCreate(s.log, s.jokeSvc)))
 
 	return router
 }

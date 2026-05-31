@@ -10,7 +10,7 @@ build:
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@set -a && source .env && set +a && go run cmd/api/main.go
 
 # Test the application
 test:

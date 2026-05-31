@@ -1,3 +1,4 @@
+// Package config contains the application config
 package config
 
 import "os"
@@ -5,14 +6,14 @@ import "os"
 type Config struct {
 	Env   string
 	Port  string
-	DbURL string
+	DBURL string
 }
 
 func NewConfig() Config {
 	return Config{
 		Env:   getEnv("APP_ENV", "local"),
 		Port:  getEnv("PORT", "8000"),
-		DbURL: getEnv("DB_URL", "./test.db"),
+		DBURL: getEnv("DB_URL", "./test.db"),
 	}
 }
 

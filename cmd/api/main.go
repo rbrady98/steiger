@@ -13,13 +13,10 @@ import (
 
 	"github.com/rbrady98/steiger/internal/config"
 	"github.com/rbrady98/steiger/internal/database"
+	"github.com/rbrady98/steiger/internal/joke"
 	"github.com/rbrady98/steiger/internal/server"
-	"github.com/rbrady98/steiger/internal/services"
-	"github.com/rbrady98/steiger/internal/storage/sqlite"
 	"github.com/rbrady98/steiger/internal/telemetry"
 	"go.opentelemetry.io/contrib/processors/minsev"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 const (
@@ -37,7 +34,7 @@ func main() {
 func run() error {
 	cfg := config.NewConfig()
 
-	db, err := database.New(cfg.DbURL)
+	db, err := database.New(cfg.DBURL)
 	if err != nil {
 		return err
 	}
@@ -45,7 +42,7 @@ func run() error {
 
 	logger := telemetry.NewLogger(cfg.Env, minsev.SeverityDebug)
 
-	jokeSvc := services.NewJokeService(logger, sqlite.NewSqliteJokeRepo(db))
+	jokeSvc := joke.NewService(logger, joke.NewSQLiteRepo(db))
 
 	// Setup signal context
 	rootCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

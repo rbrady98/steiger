@@ -1,9 +1,9 @@
 version: "2"
 sql:
   - engine: "sqlite"
-    queries: "./internal/database/queries"
-    schema: "./internal/database/migrations"
+    schema: "./internal/database/migrations"  # Keep migrations centralized
+    queries: "./internal/joke/queries.sql"
     gen:
       go:
-        package: "sqlitedb"
-        out: "./internal/sqlitedb"
+        package: "db"
+        out: "./internal/joke/db"

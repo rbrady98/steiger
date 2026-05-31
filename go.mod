@@ -4,7 +4,6 @@ go 1.26.0
 
 require (
 	github.com/go-chi/chi/v5 v5.2.3
-	github.com/joho/godotenv v1.5.1
 	github.com/lmittmann/tint v1.1.3
 	go.opentelemetry.io/contrib/bridges/otelslog v0.18.0
 	go.opentelemetry.io/contrib/instrumentation/host v0.68.0

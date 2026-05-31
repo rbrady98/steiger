@@ -11,9 +11,7 @@ import (
 	"time"
 
 	"github.com/rbrady98/steiger/internal/config"
-	"github.com/rbrady98/steiger/internal/services"
-
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/rbrady98/steiger/internal/joke"
 )
 
 type Server struct {
@@ -21,10 +19,10 @@ type Server struct {
 
 	log *slog.Logger
 
-	jokeSvc *services.JokeService
+	jokeSvc *joke.Service
 }
 
-func NewServer(ctx context.Context, cfg config.Config, logger *slog.Logger, jokeSvc *services.JokeService) *http.Server {
+func NewServer(ctx context.Context, cfg config.Config, logger *slog.Logger, jokeSvc *joke.Service) *http.Server {
 	s := &Server{
 		port:    cfg.Port,
 		log:     logger,

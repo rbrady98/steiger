@@ -1,9 +1,18 @@
+// Package joke contains domain data for jokes
 package joke
 
 import (
 	"context"
 	"errors"
+	"time"
 )
+
+type Joke struct {
+	ID        int
+	Joke      string
+	Nsfw      bool
+	CreatedAt time.Time
+}
 
 type Repository interface {
 	Get(ctx context.Context, id int) (Joke, error)
